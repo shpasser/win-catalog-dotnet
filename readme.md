@@ -17,7 +17,7 @@ HashSet<string> hashes = new HashSet<string>();
 foreach (var file in d.GetFiles("*.cat"))
 {
     int  catVer;
-    var temp = .GetHashesFromCatalog(file.FullName, out catVer);
+    var temp = WinCatalog.GetHashesFromCatalog(file.FullName, out catVer);
     foreach (string hash in temp)
     {
         hashes.Add(hash);
