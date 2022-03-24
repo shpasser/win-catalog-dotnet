@@ -6,7 +6,7 @@ using BOOL = System.UInt32;
 namespace wincatalogdotnet
 {
     /// <summary>
-    /// Contains all of the native Win32 stuff
+    /// Native Win32 Catalog related APIs and data structures  
     /// </summary>
     class NativeMethods
     {
@@ -185,11 +185,8 @@ namespace wincatalogdotnet
             DWORD dwFlags
         );
 
-        internal const string CloseHandleDllName = "api-ms-win-core-handle-l1-1-0.dll";                      /*32*/
-        /// Return Type: BOOL->int
-        ///hObject: HANDLE->void*
-        [DllImportAttribute(CloseHandleDllName, EntryPoint = "CloseHandle")]
-        [return: MarshalAsAttribute(UnmanagedType.Bool)]
-        internal static extern bool CloseHandle([InAttribute()] System.IntPtr hObject);
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool CloseHandle(IntPtr hObject);
     }
 }
