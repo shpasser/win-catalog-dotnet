@@ -17,7 +17,7 @@ HashSet<string> hashes = new HashSet<string>();
 foreach (var file in d.GetFiles("*.cat"))
 {
     int  catVer;
-    var temp = CatalogHelper.GetHashesFromCatalog(file.FullName, out catVer);
+    var temp = .GetHashesFromCatalog(file.FullName, out catVer);
     foreach (string hash in temp)
     {
         hashes.Add(hash);
@@ -28,6 +28,6 @@ foreach (var file in d.GetFiles("*.cat"))
 ### Hash Files using CryptCATAdminCalcHashFromFileHandle2
 
 ```
-string sha256 = CatalogHelper.CalculateFileHash(@"C:\Windows\System32\drivers\vmx86.sys", "SHA256");
-string sha1 = CatalogHelper.CalculateFileHash(@"C:\Windows\System32\drivers\vmx86.sys", "SHA1");
+string sha256 = WinCatalog.CalculateFileHash(@"C:\Windows\System32\drivers\vmx86.sys", "SHA256");
+string sha1 = WinCatalog.CalculateFileHash(@"C:\Windows\System32\drivers\vmx86.sys", "SHA1");
 ```
