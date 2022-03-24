@@ -15,12 +15,11 @@ namespace wincatalogdotnet
         private static int catalogVersion2 = 512;
 
         /// <summary>
-        /// Make list of hashes for given Catalog File
+        /// Returns set of hash strings for a given Catalog File
         /// </summary>
-        /// <param name="catalogFilePath"> Path to the folder having catalog file </param>
-        /// <param name="excludedPatterns"></param>
-        /// <param name="catalogVersion"> The version of input catalog we read from catalog meta data after opening it.</param>
-        /// <returns> Dictionary mapping files relative paths to HashValues </returns>
+        /// <param name="catalogFilePath">the catalog file path</param>
+        /// <param name="catalogVersion">the catalog version</param>
+        /// <returns>set of hash strings</returns>
         public static HashSet<String> GetHashesFromCatalog(string catalogFilePath, out int catalogVersion)
         {
             IntPtr resultCatalog = NativeMethods.CryptCATOpen(catalogFilePath, 0, IntPtr.Zero, 1, 0);
@@ -35,14 +34,15 @@ namespace wincatalogdotnet
                     catalogVersion = GetCatalogVersion(resultCatalog);
 
                     IntPtr memberInfo = IntPtr.Zero;
-                    // Navigate all members in Catalog files and get their relative paths and hashes
                     do
                     {
                         memberInfo = NativeMethods.CryptCATEnumerateMember(resultCatalog, memberInfo);
                         if (memberInfo != IntPtr.Zero)
                         {
-                            NativeMethods.CRYPTCATMEMBER currentMember = Marshal.PtrToStructure<NativeMethods.CRYPTCATMEMBER>(memberInfo);
-                            NativeMethods.SIP_INDIRECT_DATA pIndirectData = Marshal.PtrToStructure<NativeMethods.SIP_INDIRECT_DATA>(currentMember.pIndirectData);
+                            NativeMethods.CRYPTCATMEMBER currentMember = (NativeMethods.CRYPTCATMEMBER)
+                                Marshal.PtrToStructure(memberInfo, typeof(NativeMethods.CRYPTCATMEMBER));
+                            NativeMethods.SIP_INDIRECT_DATA pIndirectData = (NativeMethods.SIP_INDIRECT_DATA)
+                                Marshal.PtrToStructure(currentMember.pIndirectData, typeof(NativeMethods.SIP_INDIRECT_DATA));
 
                             // For Catalog version 2 CryptoAPI puts hashes of file attributes(relative path in our case) in Catalog as well
                             // We validate those along with file hashes so we are skipping duplicate entries
@@ -66,16 +66,17 @@ namespace wincatalogdotnet
         }
 
         /// <summary>
-        /// Find out the Version of Catalog by reading its Meta data. We can have either version 1 or version 2 catalog
+        /// Returns the Version of a Catalog by reading its meta data
         /// </summary>
-        /// <param name="catalogHandle"> Handle to open catalog file </param>
-        /// <returns> Version of the catalog </returns>
+        /// <param name="catalogHandle">the catalog file handle</param>
+        /// <returns>the catalog version (either 1 or 2)</returns>
         private static int GetCatalogVersion(IntPtr catalogHandle)
         {
             int catalogVersion = -1;
 
             IntPtr catalogData = NativeMethods.CryptCATStoreFromHandle(catalogHandle);
-            NativeMethods.CRYPTCATSTORE catalogInfo = Marshal.PtrToStructure<NativeMethods.CRYPTCATSTORE>(catalogData);
+            NativeMethods.CRYPTCATSTORE catalogInfo = (NativeMethods.CRYPTCATSTORE)
+                Marshal.PtrToStructure(catalogData, typeof(NativeMethods.CRYPTCATSTORE));
 
             if (catalogInfo.dwPublicVersion == catalogVersion2)
             {
@@ -96,11 +97,11 @@ namespace wincatalogdotnet
         }
 
         /// <summary>
-        /// Make a hash for the file
+        /// Calculates a hash string for a file
         /// </summary>
-        /// <param name="filePath"> Path of the file </param>
-        /// <param name="hashAlgorithm"> Used to calculate Hash </param>
-        /// <returns> HashValue for the file </returns>
+        /// <param name="filePath">the file path</param>
+        /// <param name="hashAlgorithm">the hash algorithm, either "SHA1" or "SHA256"</param>
+        /// <returns>the calculated hash string</returns>
         public static string CalculateFileHash(string filePath, string hashAlgorithm)
         {
             string hashValue = string.Empty;
